@@ -28,7 +28,7 @@ export default class Slot {
 			setTimeout(() => {
 				this.stoppedAt = outcome
 				this.stopped = true
-				console.log('Stopping slot')
+				console.log('Stopping slot' + new Date().toString())
 				resolve()
 			}, delay)
 		})

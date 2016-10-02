@@ -1,13 +1,15 @@
-const runningSlots = new WeakMap()
+import { removeFromArray } from 'services/utils'
+
+const runningSlots = []
 const slotImages = [0,1,2,3,4,5].map(imageNumber => `/assets/img/Symbol_${imageNumber}.png`)
 
 export default {
 	addRunningSlot(slot) {
-		runningSlots.set(slot, slot)
+		runningSlots.push(slot)
 	},
 
 	removeRunningSlot(slot) {
-		runningSlots.remove(slot)
+		removeFromArray(runningSlots, slot)
 	},
 
 	getRunningSlots() {

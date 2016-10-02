@@ -17,23 +17,28 @@ export default class SlotMachine {
 		const images = state.getSlotImages()
 		slots.forEach(slot => slot.play())
 		const animationRunner = createAnimationRunner(() => {
-			const { slots } = state.getRunningSlots()
-			let allSlotsAreStopped = true
-			slots.forEach((slot) => {
+			const runningSlots = state.getRunningSlots()
+			currentImageindex++
+			const slotsToRemove = []
+			runningSlots.forEach((slot) => {
 				let imageIndex
 				if(slot.isStopped()) {
 					imageIndex = slot.stoppedAt
-					state.removeRunningSlot(slot)
+					slotsToRemove.push(slot)
 				} else {
-					imageIndex = currentImageindex++
-					allSlotsAreStopped = false
+					imageIndex = currentImageindex
 				}
 				slot.changeSlotImage(`url(${images[imageIndex]})`)
 			})
-			if(allSlotsAreStopped) {
-				animationRunner.stopAnimation()
+			state.removeRunningSlot.apply(this, slotsToRemove)
+			if(currentImageindex >= images.length -1) {
+				currentImageindex = 0
 			}
-		}, 16)
+			if(runningSlots.length === 0) {
+				animationRunner.stopAnimation()
+				console.log('STOP!')
+			}
+		})
 		animationRunner.runAnimation()
 	}
 
@@ -42,6 +47,7 @@ export default class SlotMachine {
 			this.playSlots()
 			setTimeout(() => {
 				API.play(isBonus).then((response) => {
+					console.log(JSON.stringify(response))
 					this.stop(response).then(resolve)
 				})
 			}, 1000)
