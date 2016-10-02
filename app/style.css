@@ -1,0 +1,17 @@
+@import '../node_modules/normalize.css/normalize.css';
+
+.btn {
+
+}
+
+.play-btn {
+	height: 50px;
+	width: 50px;
+	background-image: url('../assets/img/button.png');
+}
+
+.slot-machine__slot {
+	width: 100px;
+	height: 100px;
+	background-image: url('../assets/img/Symbol_0.png');
+}
