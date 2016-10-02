@@ -5,7 +5,6 @@ export default class Slot {
 	}
 
 	play() {
-		console.log('Playing slot')
 		this.reset()
 		state.addRunningSlot(this)
 	}
@@ -28,7 +27,6 @@ export default class Slot {
 			setTimeout(() => {
 				this.stoppedAt = outcome
 				this.stopped = true
-				console.log('Stopping slot' + new Date().toString())
 				resolve()
 			}, delay)
 		})

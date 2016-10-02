@@ -36,7 +36,6 @@ export default class SlotMachine {
 			}
 			if(runningSlots.length === 0) {
 				animationRunner.stopAnimation()
-				console.log('STOP!')
 			}
 		})
 		animationRunner.runAnimation()
@@ -45,9 +44,9 @@ export default class SlotMachine {
 	play(isBonus) {
 		return new Promise((resolve, reject) => {
 			this.playSlots()
+			// Send the request after 1 second
 			setTimeout(() => {
 				API.play(isBonus).then((response) => {
-					console.log(JSON.stringify(response))
 					this.stop(response).then(resolve)
 				})
 			}, 1000)
@@ -57,18 +56,23 @@ export default class SlotMachine {
 	stop({outcome, isBonus}) {
 		return new Promise((resolve, reject) => {
 			const { slots } = this
-			slots.reduce((p, slot, index) => {
+			// Run all stops in sequence
+			const lastStopPromise = slots.reduce((p, slot, index) => {
 				if(p) {
 					return p.then(() => slot.stop(outcome[index], 1000))
 				}
 				return slot.stop(outcome[index], 1000)
-			}, null).then(() => {
+			}, null)
+			lastStopPromise.then(() => {
 				if(isBonus) {
-					console.log('IS BONUS!')
-					this.play(isBonus).then(resolve)
+					// Debounce playing again so the user can see the result
+					setTimeout(() => {
+						this.play(isBonus).then(resolve)
+					}, 500)
 				} else {
 					resolve()
 				}
+				state.fireEvent('dataReceived', {outcome, isBonus})
 			})
 		})
 	}
