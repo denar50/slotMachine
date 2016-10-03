@@ -1,8 +1,12 @@
 import SlotMachine from 'classes/SlotMachine'
-
 import state from 'services/state'
+import { events as slotMachineEvents, subscribeModifiers } from 'services/stateModifiers/slotMachine'
+
+const { NEW_SCORE, IS_BONUS_CHANGE } = slotMachineEvents
 
 window.onload = () => {
+	subscribeModifiers(state)
+	
 	const slotElements = []
 	document.querySelectorAll('.slot-machine__slot').forEach(element => slotElements.push(element))
 
@@ -16,14 +20,14 @@ window.onload = () => {
 		button.disabled = true
 	})
 	const headerScoreH1 = document.querySelector('.app-header__score')
-	const updateScore = () => {
-		headerScoreH1.innerHTML = state.getScore()
+	const updateScore = (state) => {
+		headerScoreH1.innerHTML = state.score
 	}
 
-	const showBonusMessage = (payload) => {
+	const showBonusMessage = (state) => {
 		debugger
 	}
 
-	state.subscribe('dataReceived', updateScore)
-	state.subscribe('dataReceived', showBonusMessage)
+	state.subscribe(NEW_SCORE, updateScore)
+	state.subscribe(IS_BONUS_CHANGE, showBonusMessage)
 }

@@ -2,6 +2,9 @@ import Slot from 'classes/Slot'
 import { createAnimationRunner } from 'services/utils'
 import state from 'services/state'
 import API from 'services/api'
+import { events as slotMachineEvents } from 'services/stateModifiers/slotMachine'
+
+const { REMOVE_RUNNING_SLOT, NEW_DATA_RECEIVED } = slotMachineEvents
 
 export default class SlotMachine {
 	constructor(slotElements) {
@@ -12,12 +15,15 @@ export default class SlotMachine {
 	}
 
 	playSlots() {
-		const { slots } = this
 		let currentImageindex = 0
-		const images = state.getSlotImages()
+		const { slots } = this
 		slots.forEach(slot => slot.play())
 		const animationRunner = createAnimationRunner(() => {
-			const runningSlots = state.getRunningSlots()
+			const { slotImages: images, runningSlots } = state
+			if(runningSlots.length === 0) {
+				animationRunner.stopAnimation()
+				return
+			}
 			currentImageindex++
 			const slotsToRemove = []
 			runningSlots.forEach((slot) => {
@@ -30,12 +36,9 @@ export default class SlotMachine {
 				}
 				slot.changeSlotImage(`url(${images[imageIndex]})`)
 			})
-			state.removeRunningSlot.apply(this, slotsToRemove)
+			slotsToRemove.forEach(slotToRemove => state.fireEvent(REMOVE_RUNNING_SLOT, slotToRemove))
 			if(currentImageindex >= images.length -1) {
 				currentImageindex = 0
-			}
-			if(runningSlots.length === 0) {
-				animationRunner.stopAnimation()
 			}
 		})
 		animationRunner.runAnimation()
@@ -72,7 +75,7 @@ export default class SlotMachine {
 				} else {
 					resolve()
 				}
-				state.fireEvent('dataReceived', {outcome, isBonus})
+				state.fireEvent(NEW_DATA_RECEIVED, {outcome, isBonus})
 			})
 		})
 	}

@@ -1,52 +1,43 @@
-import { removeFromArray } from 'services/utils'
-import { calculateScore } from 'services/score'
+import { subscribeModifiers } from 'services/stateModifiers/slotMachine'
 
-const runningSlots = []
-const slotImages = [0,1,2,3,4,5].map(imageNumber => `/assets/img/Symbol_${imageNumber}.png`)
-const listeners = {
-	'dataReceived': []
-}
-let score = 0
-const WIN_UNIT_POINTS = 10
+const stateModifiers = {}
+
+const listeners = {}
 
 const state = {
-	addRunningSlot(slot) {
-		runningSlots.push(slot)
-	},
+	runningSlots: [],
+	slotImages: [0,1,2,3,4,5].map(imageNumber => `/assets/img/Symbol_${imageNumber}.png`),
+	score: 0,
 
-	removeRunningSlot(slot) {
-		removeFromArray(runningSlots, slot)
-	},
-
-	getRunningSlots() {
-		return runningSlots
-	},
-
-	setScore(newScore) {
-		score += newScore * WIN_UNIT_POINTS
-	},
-
-	getScore() {
-		return score
-	},
-
-	getSlotImages() {
-		return slotImages
+	subscribeStateModifier(event, modifier) {
+		if(!stateModifiers[event]) {
+			stateModifiers[event] = []
+		}
+		stateModifiers[event].push(modifier)
 	},
 
 	subscribe(event, handler) {
+		if(!listeners[event]) {
+			listeners[event] = []
+		}
 		listeners[event].push(handler)
 	},
 
 	fireEvent(event, payload) {
-		listeners[event].forEach((handler) => {
-			handler.call(null, payload)
-		})
+		const { [event]: currentModifiers } = stateModifiers
+		const { [event]: currentListeners } = listeners
+		if(currentModifiers) {
+			currentModifiers.forEach((modifier) => {
+				modifier.call(null, payload, this)
+			})
+		}
+
+		if(currentListeners) {
+			currentListeners.forEach((listener) => {
+				listener(this)
+			})
+		}
 	}
 }
-
-state.subscribe('dataReceived', ({outcome}) => {
-	state.setScore(calculateScore(outcome))
-})
 
 export default state

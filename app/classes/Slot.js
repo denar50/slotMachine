@@ -1,4 +1,8 @@
 import state from 'services/state'
+import { events as slotMachineEvents } from 'services/stateModifiers/slotMachine'
+
+const { ADD_RUNNING_SLOT } = slotMachineEvents
+
 export default class Slot {
 	constructor(element) {
 		this.element = element
@@ -6,7 +10,7 @@ export default class Slot {
 
 	play() {
 		this.reset()
-		state.addRunningSlot(this)
+		state.fireEvent(ADD_RUNNING_SLOT, this)
 	}
 
 	reset() {
