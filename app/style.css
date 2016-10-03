@@ -32,11 +32,15 @@ body {
 	cursor: pointer;
 }
 
+.btn:focus {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
 .controls__play-btn {
-	height: 50px;
-	width: 50px;
+	height: 60px;
+	width: 60px;
 	background-image: url('../assets/img/button.png');
-	background-size: 50px;
+	background-size: 60px;
 }
 
 .controls__play-btn:disabled {
@@ -54,6 +58,22 @@ body {
 	margin: 20px;
 }
 
+.app-header__score {
+	text-transform: capitalize;
+	line-height: 2em;
+	height: 2em;
+	margin:0;
+}
+
+@media only screen and (max-width: 40em) {
+	.slot-machine__slot {
+		width: 80px;
+		height: 80px;
+		background-size: 80px;
+	}
+}
+
+/* Medium and bigger screens */
 @media only screen and (min-width: 40.063em) {
 	.slot-machine__slot {
 		width: 150px;

@@ -4,7 +4,7 @@ import state from 'services/state'
 import API from 'services/api'
 import { events as slotMachineEvents } from 'services/stateModifiers/slotMachine'
 
-const { REMOVE_RUNNING_SLOT, NEW_DATA_RECEIVED } = slotMachineEvents
+const { REMOVE_RUNNING_SLOT, NEW_DATA_RECEIVED, IS_BONUS_CHANGE } = slotMachineEvents
 
 export default class SlotMachine {
 	constructor(slotElements) {
@@ -70,6 +70,7 @@ export default class SlotMachine {
 				if(isBonus) {
 					// Debounce playing again so the user can see the result
 					setTimeout(() => {
+						state.fireEvent(IS_BONUS_CHANGE, true)
 						this.play(isBonus).then(resolve)
 					}, 500)
 				} else {

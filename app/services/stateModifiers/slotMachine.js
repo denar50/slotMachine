@@ -27,9 +27,8 @@ export const setIsBonus = (isBonus, state) => {
 	state.isBonus = isBonus
 }
 
-export const newDataReceived = ({outcome, isBonus}, state) => {
+export const newDataReceived = ({outcome}, state) => {
 	state.fireEvent(NEW_SCORE, outcome)
-	state.fireEvent(IS_BONUS_CHANGE, isBonus)
 }
 
 export const subscribeModifiers = (state) => {

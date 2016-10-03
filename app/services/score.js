@@ -11,13 +11,13 @@ export const getScoreString = (score) => {
 	let scoreString = ''
 	switch(score) {
 		case SMALL_WIN_SLOTS_COUNT:
-			scoreString = 'small win'
+			scoreString = 'small win!'
 			break
 		case BIG_WIN_SLOTS_COUNT:
-			scoreString = 'big win'
+			scoreString = 'big win!'
 			break
 		default:
-			scoreString = 'try again'
+			scoreString = 'no win'
 			break
 	}
 	return scoreString
