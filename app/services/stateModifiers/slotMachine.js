@@ -1,6 +1,5 @@
 import { removeFromArray } from 'services/utils'
-import { WIN_UNIT_POINTS } from 'services/constants'
-import { calculateScore } from 'services/score'
+import { getScore } from 'services/score'
 
 export const events = {
 	ADD_RUNNING_SLOT: 'ADD_RUNNING_SLOT',
@@ -20,9 +19,8 @@ export const removeRunningSlot = (slot, state) => {
 	removeFromArray(state.runningSlots, slot)
 }
 
-export const setScore = (outcome, state) => {
-	const newScore = calculateScore(outcome)
-	state.score += newScore * WIN_UNIT_POINTS
+export const setCurrentScore = (outcome, state) => {
+	state.currentScore = getScore(outcome)
 }
 
 export const setIsBonus = (isBonus, state) => {
@@ -37,7 +35,7 @@ export const newDataReceived = ({outcome, isBonus}, state) => {
 export const subscribeModifiers = (state) => {
 	state.subscribeStateModifier(ADD_RUNNING_SLOT, addRunningSlot)
 	state.subscribeStateModifier(REMOVE_RUNNING_SLOT, removeRunningSlot)
-	state.subscribeStateModifier(NEW_SCORE, setScore)
+	state.subscribeStateModifier(NEW_SCORE, setCurrentScore)
 	state.subscribeStateModifier(IS_BONUS_CHANGE, setIsBonus)
 	state.subscribeStateModifier(NEW_DATA_RECEIVED, newDataReceived)
 }

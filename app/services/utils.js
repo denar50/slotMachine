@@ -5,6 +5,22 @@ export const removeFromArray = (array, element) => {
 		array.splice(index, 1)
 	}
 }
+
+export const getMostRepeatedNumberCountInArray = (array) => {
+	let occurrences = {}
+	let mostRepeatedValueCount = 0
+	array.forEach((arrayValue) => {
+		if(!occurrences[arrayValue]) {
+			occurrences[arrayValue] = 0
+		}
+		const currentValueCount = ++occurrences[arrayValue]
+		if(currentValueCount > mostRepeatedValueCount) {
+			mostRepeatedValueCount = currentValueCount
+		}
+	})
+	return mostRepeatedValueCount
+}
+
 export const createAnimationRunner = (animation) => {
 	let stop = false
 
