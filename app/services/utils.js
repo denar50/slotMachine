@@ -21,24 +21,26 @@ export const getMostRepeatedNumberCountInArray = (array) => {
 	return mostRepeatedValueCount
 }
 
-export const createAnimationRunner = (animation) => {
-	let stop = false
+export const animationRunnerFactory = {
+	create (domChangeCallback) {
+		let stop = false
+		const animationRunner = {
+			runAnimation,
+			stopAnimation
+		}
 
-	function animate() {
-		if(stop) return //break the spell
-	  requestAnimationFrame(animate)
-		animation()
-	}
-	function runAnimation() {
-		animate()
-	}
+		function animate() {
+			if(stop) return //break the spell
+		  requestAnimationFrame(animate)
+			domChangeCallback(animationRunner)
+		}
+		function runAnimation() {
+			animate()
+		}
 
-	function stopAnimation() {
-		stop = true
-	}
-
-	return {
-		runAnimation,
-		stopAnimation
+		function stopAnimation() {
+			stop = true
+		}
+		return animationRunner
 	}
 }

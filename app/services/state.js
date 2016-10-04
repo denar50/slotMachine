@@ -6,7 +6,6 @@ const listeners = {}
 
 const state = {
 	runningSlots: [],
-	slotImages: [0,1,2,3,4,5].map(imageNumber => `/assets/img/Symbol_${imageNumber}.png`),
 	score: 0,
 
 	subscribeStateModifier(event, modifier) {
