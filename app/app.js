@@ -8,11 +8,13 @@ const { NEW_SCORE, IS_BONUS_CHANGE } = slotMachineEvents
 window.onload = () => {
 	subscribeModifiers(state)
 
+	// Get all the slot elements from the DOM
+	// for each, create a slot and finally create an instance of the SlotMachine
 	const slotElements = []
 	document.querySelectorAll('.slot-machine__slot').forEach(element => slotElements.push(element))
-
 	const slotMachine = new SlotMachine(slotElements)
 
+	// Add onclick event to the play button
 	document.querySelector('.controls__play-btn').addEventListener('click', (event) => {
 		updateStatusMessage('')
 		const { target: button } = event
@@ -21,6 +23,8 @@ window.onload = () => {
 		})
 		button.disabled = true
 	})
+
+	// Change the score message
 	const headerScoreH1 = document.querySelector('.app-header__score')
 	const updateScore = ({currentScore}) => {
 		updateStatusMessage(getScoreString(currentScore))
