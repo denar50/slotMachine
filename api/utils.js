@@ -3,5 +3,5 @@ const generateRandomInteger = (min, max) => {
 }
 
 module.exports = {
-	generateRandomInteger: generateRandomInteger
+	generateRandomInteger
 }

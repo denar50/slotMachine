@@ -7,17 +7,29 @@ import state from 'services/state'
 import API from 'services/api'
 import { events as slotMachineEvents } from 'services/stateModifiers/slotMachine'
 import { removeFromArray } from 'services/utils'
-const { REMOVE_RUNNING_SLOT } = slotMachineEvents
+import { STOP_SLOT_DELAY, PLAY_AFTER_BONUS_DEBOUNCE_TIME } from 'services/constants'
+const { REMOVE_RUNNING_SLOT, NEW_DATA_RECEIVED, IS_BONUS_CHANGE } = slotMachineEvents
+
+const promiseStubThatRunsThenImmediately = () =>  {
+	return {
+		then: thenCallback => thenCallback.apply(null, arguments)
+	}
+}
 
 describe('SlotMachine', () => {
 	let slotMachine
 	before(() => {
 		slotMachine = new SlotMachine([{}, {}, {}])
-		sinon.spy(Slot.prototype, 'play')
+		sinon.stub(state, 'fireEvent', (eventName, slot) => {
+			const { runningSlots } = state
+			if(eventName === REMOVE_RUNNING_SLOT) {
+				removeFromArray(runningSlots, slot)
+			}
+		})
 	})
 
 	after(() => {
-		Slot.prototype.play.restore()
+		state.fireEvent.restore()
 	})
 
 	describe('constructor', () => {
@@ -39,21 +51,10 @@ describe('SlotMachine', () => {
 	})
 
 	describe('play', () => {
-		let apiThenCallback
 		before(() => {
 			sinon.stub(SlotMachine.prototype, 'playSlots')
-			sinon.stub(SlotMachine.prototype, 'stop', () => {
-				return {
-					then: () => {}
-				}
-			})
-			sinon.stub(API, 'play', () => {
-				return {
-					then: (callback) => {
-						apiThenCallback = callback
-					}
-				}
-			})
+			sinon.stub(SlotMachine.prototype, 'stop', promiseStubThatRunsThenImmediately)
+			sinon.stub(API, 'play', promiseStubThatRunsThenImmediately)
 			slotMachine.play()
 		})
 
@@ -68,7 +69,6 @@ describe('SlotMachine', () => {
 		})
 
 		it('Should call stop when the API responds', () => {
-			apiThenCallback()
 			expect(slotMachine.stop.calledOnce).to.be.true
 		})
 
@@ -86,16 +86,17 @@ describe('SlotMachine', () => {
 	describe('playSlots', () => {
 		let animationRunner
 		before(() => {
+			sinon.stub(Slot.prototype, 'play')
 			sinon.stub(animationRunnerFactory, 'create', () => {
 				animationRunner =  {
-					runAnimation: sinon.spy(),
-					stopAnimation: sinon.spy()
+					runAnimation: sinon.spy()
 				}
 				return animationRunner
 			})
 		})
 
 		after(() => {
+			Slot.prototype.play.restore()
 			animationRunnerFactory.create.restore()
 		})
 
@@ -125,7 +126,6 @@ describe('SlotMachine', () => {
 
 		beforeEach(() => {
 			runningSlots = state.runningSlots = []
-			runningSlots.push.apply(runningSlots, slotMachine.slots)
 			sinon.stub(Slot.prototype, 'changeSlotBackground')
 		})
 
@@ -134,10 +134,9 @@ describe('SlotMachine', () => {
 		})
 
 		it('Should change the slot image of each running slot', () => {
+			runningSlots.push.apply(runningSlots, slotMachine.slots)
 			slotMachine.changeSlotsBackground()
-			runningSlots.forEach((slot) => {
-				expect(slot.changeSlotBackground.calledOnce).to.be.true
-			})
+			expect(Slot.prototype.changeSlotBackground.callCount).to.equal(runningSlots.length)
 		})
 
 		it('Should stop the animation when there are not slots running', () => {
@@ -146,7 +145,7 @@ describe('SlotMachine', () => {
 			}
 			slotMachine.changeSlotsBackground(animationRunner)
 			runningSlots.forEach((slot) => expect(slot.changeSlotBackground.called).to.be.false)
-			expect(animationRunner.calledOnce).to.be.true
+			expect(animationRunner.stopAnimation.calledOnce).to.be.true
 		})
 
 	})
@@ -155,15 +154,6 @@ describe('SlotMachine', () => {
 		before(() => {
 			const runningSlots = state.runningSlots = []
 			runningSlots.push.apply(runningSlots, slotMachine.slots)
-			sinon.stub(state, 'fireEvent', (eventName, slot) => {
-				if(eventName === REMOVE_RUNNING_SLOT) {
-					removeFromArray(runningSlots, slot)
-				}
-			})
-		})
-
-		after(() => {
-			state.fireEvent.restore()
 		})
 
 		it('Should remove all the slots that stopped from the running slots array', (done) => {
@@ -179,12 +169,49 @@ describe('SlotMachine', () => {
 	})
 
 	describe('stop', () => {
-		it('Should call stop on each slot', () => {
-
+		const outcomeArray = [0, 1, 2]
+		const isBonus = true
+		let stopPromise
+		beforeEach(() => {
+			stopPromise = slotMachine.stop({outcome: outcomeArray, isBonus})
 		})
 
-		it('Should call play again if it is a bonus game', () => {
+		before(() => {
+			sinon.stub(SlotMachine.prototype, 'stopSlotsSequentially', promiseStubThatRunsThenImmediately)
+			sinon.stub(SlotMachine.prototype, 'play', promiseStubThatRunsThenImmediately)
+		})
 
+		after(() => {
+			SlotMachine.prototype.stopSlotsSequentially.restore()
+			SlotMachine.prototype.play.restore()
+		})
+
+		it('Should stop all the slots after some time', function(done){
+			stopPromise.then(() => {
+				expect(slotMachine.stopSlotsSequentially.calledWith(outcomeArray)).to.be.true
+				done()
+			})
+		})
+
+		it('Should call play again if it is a bonus game', function(done){
+			stopPromise.then(() => {
+				expect(slotMachine.play.calledWith(true))
+				done()
+			})
+		})
+
+		it('Should fire a new data received event', function(done){
+			stopPromise.then(() => {
+				expect(state.fireEvent.calledWith(NEW_DATA_RECEIVED, {outcome: outcomeArray, isBonus}))
+				done()
+			})
+		})
+
+		it('Should fire a new data received event', function(done){
+			stopPromise.then(() => {
+				expect(state.fireEvent.calledWith(IS_BONUS_CHANGE, true))
+				done()
+			})
 		})
 	})
 })

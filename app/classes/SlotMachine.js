@@ -13,7 +13,6 @@ export default class SlotMachine {
 			this.slots.push(new Slot(slotElement))
 		})
 		this.changeSlotsBackground = this.changeSlotsBackground.bind(this)
-		this.resetCurrentImageIndexWhenNoResults()
 	}
 
 	changeSlotsBackground(animationRunner) {
@@ -30,10 +29,6 @@ export default class SlotMachine {
 	removeStoppedSlotsFromRunningSlots() {
 		const { runningSlots } = state
 		runningSlots.forEach(slot => slot.isStopped() && state.fireEvent(REMOVE_RUNNING_SLOT, slot))
-	}
-
-	resetCurrentImageIndexWhenNoResults() {
-		this.currentImageIndexWhenNoResults = 0
 	}
 
 	playSlots() {
