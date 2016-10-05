@@ -11,7 +11,10 @@ window.onload = () => {
 	// Get all the slot elements from the DOM
 	// for each, create a slot and finally create an instance of the SlotMachine
 	const slotElements = []
-	document.querySelectorAll('.slot-machine__slot').forEach(element => slotElements.push(element))
+	const slotDomElements = document.querySelectorAll('.slot-machine__slot')
+	for(let i = 0, length = slotDomElements.length; i < length; i++) {
+		slotElements.push(slotDomElements[i])
+	}
 	const slotMachine = new SlotMachine(slotElements)
 
 	// Add onclick event to the play button
