@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "ENVIRONMENT='dev' node server.js && webpack -w",
+    "dev": "webpack && node server.js",
     "tests": "webpack-dev-server --config webpack.test.config.js --watch --inline --host localhost --port 8999"
   },
   "name": "slot-machine",
