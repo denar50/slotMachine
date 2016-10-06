@@ -38,7 +38,9 @@ window.onload = () => {
 	}
 
 	const showBonusMessage = ({isBonus}) => {
-		isBonus && updateStatusMessage('BONUS!')
+		if(isBonus) {
+			updateStatusMessage('BONUS!')
+		}
 	}
 
 	state.subscribe(NEW_SCORE, updateScore)

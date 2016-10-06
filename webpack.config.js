@@ -6,6 +6,13 @@ module.exports = {
 		filename: './dist/bundle.js'
 	},
 	module: {
+		preLoaders: [
+      {
+        test: /\.js?$/,
+        loaders: ['jshint'],
+				exclude: '/node_modules'
+      }
+    ],
 		loaders: [
       {
         test: /\.js$/,
